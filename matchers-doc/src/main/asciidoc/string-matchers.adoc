@@ -1,0 +1,27 @@
+:last-update-label:
+:chapter-label:
+:doctype: book
+:linkcss:
+:stylesdir: css/
+:source-highlighter: coderay
+:numbered:
+:imagesdir: chapters
+:icons: font
+:pdf-stylesdir: css/
+:pdf-style: article
+:experimental:
+:toc-title: Inhaltsverzeichnis
+:figure-caption: Abbildung
+:table-caption: Tabelle
+:status: in Bearbeitung
+:datum: 20. November 2017
+:author: Markus Günther
+
+= A Journey To Java 9 Modules
+Markus Günther
+v1.0, 2017-11-20
+
+:toc:
+
+include::chapters/baseline.adoc[]
+include::chapters/migration-path.adoc[]

@@ -1,0 +1,23 @@
+[[section:baseline]]
+
+## Baseline
+
+### Modules
+
+[plantuml, baseline-modules, svg]
+--
+include::images/baseline-modules.puml[]
+--
+
+The baseline is comprised of the two Maven modules shown in the diagram above. They consist of one module that features the API for our String matching algorithms as well as two implementations, and another module that implements a CLI to run text searches against those implementations.
+
+### Module Structure - Level 1
+
+[plantuml, baseline-level-1,svg]
+--
+include::images/baseline-level-1.puml[]
+--
+
+Looking at the module structure of both modules, we can see that both modules use the same package hierarchy: All interfaces and classes are located at `net.mguenther.matchers`.
+
+Every interface and class of module `matchers-core` is accessible for use from module `matchers-cli`. There is no access constraint whatsoever that could prevent the CLI from directly instantiating the algorithms implemented in `BruteForceMatcher` and `KnuthMorrisPrattMatcher`.

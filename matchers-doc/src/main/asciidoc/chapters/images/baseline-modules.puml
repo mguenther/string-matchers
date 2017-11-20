@@ -1,0 +1,17 @@
+@startuml
+
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam frame {
+    borderColor Transparent
+    backgroundColor Transparent
+    fontColor Transparent
+}
+
+component "<b>matchers-core</b>" <<Matchers API and Algorithms>> as matcherscore
+component "<b>matchers-cli</b>" <<Matchers CLI>> as matcherscli
+
+matcherscli ..> matcherscore
+
+@enduml

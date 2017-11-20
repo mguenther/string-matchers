@@ -13,7 +13,7 @@
     <modules>
         <module>matchers-core</module>
         <module>matchers-cli</module>
-    </modules>
+  </modules>
 
     <properties>
         <junit.version>4.12</junit.version>
@@ -36,6 +36,19 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <!-- Use this profile to build documents -->
+        <profile>
+            <id>docs</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>matchers-doc</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>

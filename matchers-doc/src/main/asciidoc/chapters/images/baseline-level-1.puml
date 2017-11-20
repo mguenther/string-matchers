@@ -1,0 +1,39 @@
+@startuml
+
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam frame {
+    borderColor Transparent
+    backgroundColor Transparent
+    fontColor Transparent
+}
+
+package "<b>matchers-cli</b>" {
+
+  class MatchersCli {
+    +main(args: String[]): void
+  }
+}
+
+package "<b>matchers-core</b>" {
+
+  package net.mguenther.matchers {
+
+    interface Matcher {
+      +match(haystack: String, needle: String): List[Integer]
+    }
+
+    class BruteForceMatcher
+    class KnuthMorrisPrattMatcher
+
+    BruteForceMatcher ..|> Matcher
+    KnuthMorrisPrattMatcher ..|> Matcher
+  }
+}
+
+MatchersCli --> Matcher
+MatchersCli ..> BruteForceMatcher : creates
+MatchersCli ..> KnuthMorrisPrattMatcher : creates
+
+@enduml
