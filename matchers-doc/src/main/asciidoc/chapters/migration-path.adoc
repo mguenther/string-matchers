@@ -7,3 +7,184 @@ We will document our migration path through a variety of tiny steps until we hav
 1. Switch to language level *Java 9* in both the IDE (IntelliJ IDEA 17.2) as well as setting the source and target language level to Java 9 - and see what happens.
 2. Introduce Jigsaw modularization for the already existing Maven modules. We will follow a *Single Java module - Single Maven module* approach to keep things simple.
 3. Leverage service providers to further decouple our new modules.
+
+## Switch to JDK 9
+
+### Migrating `matchers-core`
+
+#### Maven Compiler Plugin
+
+[source,xml]
+----
+<plugins>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+            <source>9</source>
+            <target>9</target>
+            <showWarnings>true</showWarnings>
+            <showDeprecation>true</showDeprecation>
+        </configuration>
+    </plugin>
+</plugins>
+----
+
+#### Maven Resource File
+
+[source,bash]
+----
+export JAVA_HOME=/usr/lib/jvm/java-9-oracle
+export PATH=${PATH}:$JAVA_HOME/bin
+----
+
+NOTE: After switching to JDK 9 for Maven, the solutions still compiles without any errors and - in this particular case - without any migration warnings.
+
+NOTE: There is a 1:1-relationship between Maven modules and Java modules. If the matchers-core Maven module is comprised of two Java modules at location `src` (e.g. `matchers.api` and `matchers.impl`), the IDE will show an error "module-info.java already exists within module") and the solution will not compile. This is pretty self-explanatory: The target artefact of a Maven module is a single JAR, locatable by the Maven coordinates of the Maven module. Allowing multiple Java modules within a Maven module (which are packages as a JAR as well) would break the Maven coordinates.
+
+#### Separating API from Implementation
+
+The layout is as follows (src/main/java):
+
+* net.mguenther.matchers.BruteForceMatcher
+* net.mguenther.matchers.KnuthMorrisPrattMatcher
+* net.mguenther.matchers.Matcher
+
+We will create a new Maven module `matchers-api` and *copy* `net.mguenther.matchers.Matchers` to that module. We will also introduce a `module-info.java` like so:
+
+[source,java]
+----
+module matchers.api {
+  exports net.mguenther.matchers;
+}
+----
+
+The module will only contain the API, e.g. the `Matchers` interface.
+
+For the time being, we will also keep that interface in Maven module `matchers-core`, in order to not break the build.
+
+Then we will try to introduce another module: `matchers.impl` to separate API from implementation. We will use the same package space for both modules. For obvious reasons, this will fail.
+
+First, we rename `src/main` in `matchers-core` to `matchers.impl` and demarcate that folder as a source folder. We will also have to remove the `java` subpath. We create a `module-info.java` like so:
+
+[source,java]
+----
+module matchers.impl {
+    requires matchers.api;
+    exports net.mguenther.matchers.impl;
+}
+----
+
+This will yield an error, since the Maven module that contains the Java module `matchers.api` is not in the set of dependencies for Maven module `matchers-core`. We will fix that with the following addition to the resp. `pom.xml`.
+
+[source,xml]
+----
+<dependency>
+    <groupId>net.mguenther.matchers</groupId>
+    <artifactId>matchers-api</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
+----
+
+And then we finally delete the interface `Matcher` from module `matchers.impl` so that the `Matcher` interface from module `matchers.api` is used.
+
+NOTE: We still have an error, since both modules `matchers.api` and `matchers.impl` contain the same package `net.mguenther.matchers`. The error message in IDEA is _Package 'net.mguenther.matchers' exists in another module: 'matchers.api'. We have to abide by the rule that a Java module cannot share the packages it contains, so we rename `net.mguenther.matchers` into `net.mguenther.matchers.impl` for the time being.
+
+NOTE: The same error when trying to do a `mvn clean install` is a bit different. Since we also have a test package that contains a couple of JUnit tests, Maven simply states that it fails to compile those tests because the symbol `Matcher` is missing.
+
+[source,bash]
+----
+[ERROR] /home/mgu/workspace/string-matchers/matchers-core/src/test/java/net/mguenther/matchers/BruteForceMatcherTest.java:[16,19] cannot find symbol
+  symbol:   class Matcher
+  location: class net.mguenther.matchers.BruteForceMatcherTest
+----
+
+Renaming the package to `net.mguenther.matchers.impl` fixes the problem from within IDEA, but Maven still fails to compile the tests.
+
+[source,bash]
+----
+[ERROR] /home/mgu/workspace/string-matchers/matchers-core/src/test/java/net/mguenther/matchers/impl/KnuthMorrisPrattMatcherTest.java:[3,30] cannot find symbol
+[ERROR]   symbol:   class Matcher
+[ERROR]   location: package net.mguenther.matchers
+[ERROR] /home/mgu/workspace/string-matchers/matchers-core/src/test/java/net/mguenther/matchers/impl/KnuthMorrisPrattMatcherTest.java:[4,35] cannot find symbol
+[ERROR]   symbol:   class KnuthMorrisPrattMatcher
+[ERROR]   location: package net.mguenther.matchers.impl
+----
+
+Such errors are the result of a bad directory layout. If you want to place JUnit tests along with our Java module in a separate test sources folder, you can do so actually like before, as long as the test sources folder features a module directory that matches the modules name. The directory layout for `matchers-core` looks like this:
+
+[source,bash]
+----
+├── pom.xml
+└── src
+    ├── main
+    │   └── matchers.impl
+    │       ├── module-info.java
+    │       └── net
+    │           └── mguenther
+    │               └── matchers
+    │                   └── impl
+    │                       ├── BruteForceMatcher.java
+    │                       └── KnuthMorrisPrattMatcher.java
+    └── test
+        └── matchers.impl
+            └── net
+                └── mguenther
+                    └── matchers
+                        └── impl
+                            ├── BruteForceMatcherTest.java
+                            └── KnuthMorrisPrattMatcherTest.java
+----
+
+### Migrating `matchers-cli`
+
+Now if we issue a `mvn clean install` we run into a different error:
+
+[source,bash]
+----
+[ERROR] COMPILATION ERROR :
+[INFO] -------------------------------------------------------------
+[ERROR] /home/mgu/workspace/string-matchers/matchers-cli/src/main/java/net/mguenther/matchers/MatchersCli.java:[3,35] package net.mguenther.matchers.impl does not exist
+[ERROR] /home/mgu/workspace/string-matchers/matchers-cli/src/main/java/net/mguenther/matchers/MatchersCli.java:[4,35] package net.mguenther.matchers.impl does not exist
+[ERROR] /home/mgu/workspace/string-matchers/matchers-cli/src/main/java/net/mguenther/matchers/MatchersCli.java:[25,9] cannot find symbol
+  symbol:   class Matcher
+  location: class net.mguenther.matchers.MatchersCli
+[ERROR] /home/mgu/workspace/string-matchers/matchers-cli/src/main/java/net/mguenther/matchers/MatchersCli.java:[30,31] cannot find symbol
+  symbol:   class KnuthMorrisPrattMatcher
+  location: class net.mguenther.matchers.MatchersCli
+[ERROR] /home/mgu/workspace/string-matchers/matchers-cli/src/main/java/net/mguenther/matchers/MatchersCli.java:[35,31] cannot find symbol
+  symbol:   class BruteForceMatcher
+  location: class net.mguenther.matchers.MatchersCli
+[INFO] 5 errors
+----
+
+This is expected as our Maven module `matchers-cli` is not modularized with Jigsaw. We simply execute the same procedure again to modularize `matchers-cli` and provide the necessary `requires`-declarations along with the module descriptor.
+
+For the time being the module descriptor will look like this (we will address visibility issues shortly):
+
+[source,java]
+----
+module matchers.cli {
+    requires matchers.api;
+    requires matchers.impl;
+}
+----
+
+This will make one thing very clear: `matchers.cli` still requires access to both implementation modules. This is not beneficial as the main purpose of the module system is decouple Java modules from each other. Enter service loaders.
+
+TODO
+
+We will write some stuff about plug-in architectures and how great it would be if we can simply add modules containing algorithms to the module path and use the algorithms in our Java application (pluggable). For this, we will split `matchers.impl` into:
+
+* `matchers.bruteforce`
+* `matchers.kmp`
+
+Due to the limitations of the Java module system, we will have to rename our packages as well:
+
+* net.mguenther.matchers.bruteforce.BruteForceMatcher
+* net.mguenther.matchers.kmp.KnuthMorrisPrattMatcher
+
+## Using Service Loaders
+
+TBD

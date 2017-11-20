@@ -1,4 +1,6 @@
-package net.mguenther.matchers;
+package net.mguenther.matchers.impl;
+
+import net.mguenther.matchers.Matcher;
 
 import java.util.ArrayList;
 import java.util.Collections;

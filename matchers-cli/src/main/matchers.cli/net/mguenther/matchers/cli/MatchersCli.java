@@ -1,4 +1,8 @@
-package net.mguenther.matchers;
+package net.mguenther.matchers.cli;
+
+import net.mguenther.matchers.Matcher;
+import net.mguenther.matchers.impl.BruteForceMatcher;
+import net.mguenther.matchers.impl.KnuthMorrisPrattMatcher;
 
 import java.util.List;
 import java.util.stream.Collectors;

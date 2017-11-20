@@ -11,18 +11,12 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>matchers-core</artifactId>
+    <artifactId>matchers-api</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>[Matchers] Algorithms</name>
+    <name>[Matchers] API</name>
     <url>https://github.com/mguenther/string-matchers</url>
 
     <dependencies>
-        <!-- Intra-project dependencies -->
-        <dependency>
-            <groupId>net.mguenther.matchers</groupId>
-            <artifactId>matchers-api</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
-        </dependency>
         <!-- Testing -->
         <dependency>
             <groupId>junit</groupId>

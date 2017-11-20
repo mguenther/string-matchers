@@ -23,7 +23,7 @@
         <asciidoctor-maven.version>1.5.3</asciidoctor-maven.version>
         <asciidoctor-diagram.version>1.3.1</asciidoctor-diagram.version>
         <asciidoctor-pdf.version>1.5.0-alpha.11</asciidoctor-pdf.version>
-        <jruby-complete.version>1.7.21</jruby-complete.version>
+        <jruby-complete.version>9.1.8.0</jruby-complete.version>
     </properties>
 
     <build>
