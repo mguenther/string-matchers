@@ -21,4 +21,10 @@ public interface Matcher {
      *      no text fragments have been found
      */
     List<Integer> match(String haystack, String needle);
+
+    /**
+     * @return
+     *      the unique name of the {@code Matcher} implementation
+     */
+    String getName();
 }

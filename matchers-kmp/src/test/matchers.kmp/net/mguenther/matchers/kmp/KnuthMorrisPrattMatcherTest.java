@@ -1,7 +1,6 @@
-package net.mguenther.matchers.impl;
+package net.mguenther.matchers.kmp;
 
 import net.mguenther.matchers.Matcher;
-import net.mguenther.matchers.impl.KnuthMorrisPrattMatcher;
 import org.junit.Test;
 
 import java.util.List;

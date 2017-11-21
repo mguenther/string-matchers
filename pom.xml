@@ -13,8 +13,9 @@
 
     <modules>
         <module>matchers-api</module>
-        <module>matchers-core</module>
         <module>matchers-cli</module>
+        <module>matchers-naive</module>
+        <module>matchers-kmp</module>
     </modules>
 
     <properties>
@@ -44,7 +45,6 @@
     </build>
 
     <profiles>
-        <!-- Use this profile to build documents -->
         <profile>
             <id>docs</id>
             <activation>

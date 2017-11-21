@@ -1,10 +1,11 @@
 package net.mguenther.matchers.cli;
 
 import net.mguenther.matchers.Matcher;
-import net.mguenther.matchers.impl.BruteForceMatcher;
-import net.mguenther.matchers.impl.KnuthMorrisPrattMatcher;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 /**
@@ -23,19 +24,15 @@ public class MatchersCli {
         final String haystack = args[1];
         final String needle = args[2];
 
-        Matcher matcher = null;
-
-        switch (algorithm) {
-            case "kmp":
-                System.out.println("Using Knuth-Morris-Pratt matching algorithm");
-                matcher = new KnuthMorrisPrattMatcher();
-                break;
-            case "brute":
-            default:
-                System.out.println("Using Brute-Force matching algorithm");
-                matcher = new BruteForceMatcher();
+        final Map<String, Matcher> matchers = new HashMap<>();
+        Iterable<Matcher> availableMatchers = ServiceLoader.load(Matcher.class);
+        for (Matcher matcher : availableMatchers) {
+            System.out.println("Found matcher '" + matcher.getName() + "' provided by '" + matcher.getClass().getName() + "'.");
+            matchers.put(matcher.getName(), matcher);
         }
 
+        final Matcher matcher = matchers.getOrDefault(algorithm, matchers.get("naive"));
+        System.out.println("Using '" + matcher.getName() + "'.");
         final List<Integer> matchingPositions = matcher.match(haystack, needle);
 
         if (matchingPositions.isEmpty()) {

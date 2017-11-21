@@ -11,12 +11,13 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>matchers-cli</artifactId>
+    <artifactId>matchers-kmp</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>[Matchers] Command-Line Interface</name>
+    <name>[Matchers] Knuth-Morris-Pratt Matcher</name>
     <url>https://github.com/mguenther/string-matchers</url>
 
     <dependencies>
+        <!-- Intra-project dependencies -->
         <dependency>
             <groupId>net.mguenther.matchers</groupId>
             <artifactId>matchers-api</artifactId>

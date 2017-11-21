@@ -11,9 +11,9 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>matchers-core</artifactId>
+    <artifactId>matchers-naive</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>[Matchers] Algorithms</name>
+    <name>[Matchers] Naive Brute-Force Matcher</name>
     <url>https://github.com/mguenther/string-matchers</url>
 
     <dependencies>

@@ -2,4 +2,81 @@
 
 ## Using Service Loaders
 
-TBD
+First of all, we extend the interface `Matcher` to this:
+
+[source,java]
+----
+public interface Matcher {
+
+    List<Integer> match(String haystack, String needle);
+
+    String getName();
+}
+----
+
+This will make it easy to identify a given implementation in the CLI. The required adaptations in `matchers.impl` are not covered here.
+
+After the adaption, we need to change the module descriptor of `matchers.impl` and use `provides` to declare our services. This is where we hit the first caveat.
+
+[source,java]
+----
+module matchers.impl {
+
+    requires matchers.api;
+
+    provides net.mguenther.matchers.Matcher with net.mguenther.matchers.impl.BruteForceMatcher;
+    provides net.mguenther.matchers.Matcher with net.mguenther.matchers.impl.KnuthMorrisPrattMatcher;
+}
+----
+
+It is not possible to provide more than a single implementation for a given interface. The compiler will fail with: _Duplicate 'provides': net.mguenther.matchers.Matcher_.
+
+We have to split up our modules even further. Here is what we are going to implement:
+
+[plantuml, service-provider-modules,svg]
+--
+include::images/service-provider-modules.puml[]
+--
+
+This will provide a very clean separation between the CLI our algorithms, since both only depend on the stable module `matchers.api`.
+
+We will move `BruteForceMatcher` to module `matchers.naive` (Maven module `matchers-naive`) and `KnuthMorrisPrattMatcher` to module `matchers.kmp` (Maven module `matchers-kmp`).
+
+An example of a resulting module descriptor is:
+
+[source,java]
+----
+module matchers.naive {
+
+    requires matchers.api;
+
+    provides net.mguenther.matchers.Matcher
+        with net.mguenther.matchers.naive.BruteForceMatcher;
+}
+----
+
+As long as these modules are on the module path, they will get picked up by the service loader mechanism. The changes to `matchers.cli` are simple. First, we have to declare that we want to use all available services for interface `Matcher`.
+
+[source,java]
+----
+module matchers.cli {
+
+    requires matchers.api;
+
+    uses net.mguenther.matchers.Matcher;
+}
+----
+
+Then, we will have to adapt the code. The tight coupling to the individual implementations is gone, instead, we use the `ServiceLoader`. The following listing shows how to get all available services for the requested interface.
+
+[source,java]
+----
+Iterable<Matcher> availableMatchers = ServiceLoader.load(Matcher.class);
+for (Matcher matcher : availableMatchers) {
+    System.out.println("Found matcher '" + matcher.getName() + "' provided by '" + matcher.getClass().getName() + "'.");
+}
+----
+
+For the sake of the example, we keep things simple and store a (name, matcher)-relation using a `Map<String, Matcher>` while doing doing a reverse-lookup based on the name to select the algorithm for the search.
+
+We still have to put the modules that contain the implementations on the module path. Via IDEA, this is easy: Open up the module settings, go to module `matchers.cli` and add runtime module dependencies for the resp. modules. If you start the CLI via console, you can add the resp. modules to the module path providing a `--add-modules <modules>` via command-line arguments.

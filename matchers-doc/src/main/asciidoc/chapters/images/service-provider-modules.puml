@@ -1,0 +1,31 @@
+@startuml
+
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam frame {
+    borderColor Transparent
+    backgroundColor Transparent
+    fontColor Transparent
+}
+
+component "<b>java.base</b>" as javabase
+component "<b>matchers.api</b>" as matchersapi
+
+component "<b>matchers.naive</b>" as matchersnaive
+component "<b>matchers.kmp</b>" as matcherskmp
+
+component "<b>matchers.cli</b>" as matcherscli
+
+matcherscli ..> javabase
+matcherscli ..> matchersapi
+
+matchersapi ..> javabase
+
+matchersnaive ..> javabase
+matchersnaive ..> matchersapi
+
+matcherskmp ..> javabase
+matcherskmp ..> matchersapi
+
+@enduml

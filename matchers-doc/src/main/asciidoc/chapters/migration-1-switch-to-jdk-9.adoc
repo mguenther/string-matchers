@@ -2,6 +2,11 @@
 
 ## Switch to JDK 9
 
+[plantuml, switch-to-9-modules,svg]
+--
+include::images/switch-to-9-modules.puml[]
+--
+
 ### Maven Compiler Plugin
 
 [source,xml]

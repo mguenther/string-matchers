@@ -1,4 +1,4 @@
-package net.mguenther.matchers.impl;
+package net.mguenther.matchers.naive;
 
 import net.mguenther.matchers.Matcher;
 import org.junit.Test;
