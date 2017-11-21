@@ -1,0 +1,99 @@
+[[section:migration-matchers-core]]
+
+## Modularizing `matchers-core`
+
+NOTE: There is a 1:1-relationship between Maven modules and Java modules. If the matchers-core Maven module is comprised of two Java modules at location `src` (e.g. `matchers.api` and `matchers.impl`), the IDE will show an error "module-info.java already exists within module") and the solution will not compile. This is pretty self-explanatory: The target artefact of a Maven module is a single JAR, locatable by the Maven coordinates of the Maven module. Allowing multiple Java modules within a Maven module (which are packages as a JAR as well) would break the Maven coordinates.
+
+### Separating API from Implementation
+
+The current layout of Maven module `matchers-core` is as follows (src/main/java):
+
+* net.mguenther.matchers.BruteForceMatcher
+* net.mguenther.matchers.KnuthMorrisPrattMatcher
+* net.mguenther.matchers.Matcher
+
+We will create a new Maven module `matchers-api` and *copy* `net.mguenther.matchers.Matchers` to that module. We will also introduce a `module-info.java` like so:
+
+[source,java]
+----
+module matchers.api {
+  exports net.mguenther.matchers;
+}
+----
+
+The module will only contain the API, e.g. the `Matchers` interface.
+
+For the time being, we will also keep that interface in Maven module `matchers-core`, in order to not break the build.
+
+Then we will try to introduce another module: `matchers.impl` to separate API from implementation. We will use the same package space for both modules. For obvious reasons, this will fail.
+
+First, we rename `src/main` in `matchers-core` to `matchers.impl` and demarcate that folder as a source folder. We will also have to remove the `java` subpath. We create a `module-info.java` like so:
+
+[source,java]
+----
+module matchers.impl {
+    requires matchers.api;
+    exports net.mguenther.matchers.impl;
+}
+----
+
+This will yield an error, since the Maven module that contains the Java module `matchers.api` is not in the set of dependencies for Maven module `matchers-core`. We will fix that with the following addition to the resp. `pom.xml`.
+
+[source,xml]
+----
+<dependency>
+    <groupId>net.mguenther.matchers</groupId>
+    <artifactId>matchers-api</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
+----
+
+And then we finally delete the interface `Matcher` from module `matchers.impl` so that the `Matcher` interface from module `matchers.api` is used.
+
+NOTE: We still have an error, since both modules `matchers.api` and `matchers.impl` contain the same package `net.mguenther.matchers`. The error message in IDEA is _Package 'net.mguenther.matchers' exists in another module: 'matchers.api'. We have to abide by the rule that a Java module cannot share the packages it contains, so we rename `net.mguenther.matchers` into `net.mguenther.matchers.impl` for the time being.
+
+NOTE: The same error when trying to do a `mvn clean install` is a bit different. Since we also have a test package that contains a couple of JUnit tests, Maven simply states that it fails to compile those tests because the symbol `Matcher` is missing.
+
+[source,bash]
+----
+[ERROR] /home/mgu/workspace/string-matchers/matchers-core/src/test/java/net/mguenther/matchers/BruteForceMatcherTest.java:[16,19] cannot find symbol
+  symbol:   class Matcher
+  location: class net.mguenther.matchers.BruteForceMatcherTest
+----
+
+Renaming the package to `net.mguenther.matchers.impl` fixes the problem from within IDEA, but Maven still fails to compile the tests.
+
+[source,bash]
+----
+[ERROR] /home/mgu/workspace/string-matchers/matchers-core/src/test/java/net/mguenther/matchers/impl/KnuthMorrisPrattMatcherTest.java:[3,30] cannot find symbol
+[ERROR]   symbol:   class Matcher
+[ERROR]   location: package net.mguenther.matchers
+[ERROR] /home/mgu/workspace/string-matchers/matchers-core/src/test/java/net/mguenther/matchers/impl/KnuthMorrisPrattMatcherTest.java:[4,35] cannot find symbol
+[ERROR]   symbol:   class KnuthMorrisPrattMatcher
+[ERROR]   location: package net.mguenther.matchers.impl
+----
+
+Such errors are the result of a bad directory layout. If you want to place JUnit tests along with our Java module in a separate test sources folder, you can do so actually like before, as long as the test sources folder features a module directory that matches the modules name. The directory layout for `matchers-core` looks like this:
+
+[source,bash]
+----
+├── pom.xml
+└── src
+    ├── main
+    │   └── matchers.impl
+    │       ├── module-info.java
+    │       └── net
+    │           └── mguenther
+    │               └── matchers
+    │                   └── impl
+    │                       ├── BruteForceMatcher.java
+    │                       └── KnuthMorrisPrattMatcher.java
+    └── test
+        └── matchers.impl
+            └── net
+                └── mguenther
+                    └── matchers
+                        └── impl
+                            ├── BruteForceMatcherTest.java
+                            └── KnuthMorrisPrattMatcherTest.java
+----
