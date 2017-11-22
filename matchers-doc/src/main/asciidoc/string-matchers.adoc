@@ -23,10 +23,11 @@ v1.0, 2017-11-20
 
 :toc:
 
-include::chapters/baseline.adoc[]
-include::chapters/migration-path.adoc[]
-include::chapters/migration-1-switch-to-jdk9.adoc[]
-include::chapters/migration-2-matchers-core.adoc[]
-include::chapters/migration-3-matchers-cli.adoc[]
-include::chapters/migration-4-service-loaders.adoc[]
-include::chapters/migration-5-plugin-architectures.adoc[]
+include::chapters/introduction.adoc[]
+
+//include::chapters/migration-path.adoc[]
+//include::chapters/migration-1-switch-to-jdk9.adoc[]
+//include::chapters/migration-2-matchers-core.adoc[]
+//include::chapters/migration-3-matchers-cli.adoc[]
+//include::chapters/migration-4-service-loaders.adoc[]
+//include::chapters/migration-5-plugin-architectures.adoc[]

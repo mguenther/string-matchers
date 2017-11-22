@@ -1,0 +1,77 @@
+[[section:introduction]]
+
+## Introduction
+
+During the course of this short walkthrough we will see what is necessary to migrate an - albeit small - existing Java 8 application to a modularized Java 9 application using the Java Platform Module System (JPMS).
+
+The domain of the example application is simple on purpose and deals with string matching. There are a lot of string matching algorithms in existence with a wide variety of differing quality characteristics in terms of runtime performance, overall comparisons necessary and the like. Our example application will implement two such algorithms:
+
+* A naive, brute-force algorithm that performs rather poorly on large bodies of text.
+* The more advanced Knuth-Morris-Pratt matching algorithm, which performs quite good on large bodies of text.
+
+The output of both algorithms is a list of indices that indicates all the starting positions of a given fragment of text within the larger text.
+
+The Java 8 application also features a CLI which enables its users to search for a fragment of text in a larger text using one of the supported algorithms. Its CL interface consumes three arguments:
+
+1. The short name / ID of the algorithm. For the brute-force algorithm, this is simply _naive_ while the Knuth-Morris-Pratt matcher is selected by providing the ID _kmp_.
+2. The full text to search for fragments of text without any whitespaces.
+3. A fragment of text to look for in the given full text.
+
+We use Apache Maven for dependency management and for building the application.
+
+The Java 8 application is our https://github.com/mguenther/string-matchers/releases/tag/baseline[baseline] for the migration to a modularized Java 9 application using the JPMS.
+
+### Maven modules
+
+The https://github.com/mguenther/string-matchers/releases/tag/baseline[baseline] is a multi-module Maven project comprised of two modules.
+
+* `matchers-core`: Contains the Java API for string matching algorithms as well as the implementation of the aforementioned algorithms.
+* `matchers-cli`: Contains the CLI that runs the string matching algorithms against a body of text.
+
+The compile-time dependencies on the level of our Maven modules are shown in the following diagram.
+
+[plantuml, baseline-maven-modules, svg]
+--
+include::images/baseline-modules.puml[]
+--
+
+Let us take a brief look at the internal structure of these Maven modules.
+
+[plantuml, baseline-maven-modules-level-1, svg]
+--
+include::images/baseline-level-1.puml[]
+--
+
+Maven module `matchers-core` provides the interface `Matcher`, with a clear contract: An implementation of the `Matcher` interface consumes a large body of text (call it _haystack_) and a fragment of text (call it _needle_) and looks up all the starting indices of fragments of text found in the large body of text. This interface is located in package `net.mguenther.matchers`.
+
+Co-located with the interface are the aforementioned implementations in classes `BruteForceMatcher` and `KnuthMorrisPrattMatcher`.
+
+Although Maven module `matchers-cli` uses the interface `Matcher` to run a specific algorithm, it requires knowledge about the supported implementations. This is due to the fact that a user is able to select the algorithm she wants to use by its (abbreviated) name, which is mapped in class `MatchersCli` to an instance of the class that implements the desired algorithm. The listing underneath shows an excerpt of that class demonstrating the resolution and execution of the string matching algorithm.
+
+[source,java]
+----
+Matcher matcher = null;
+
+switch (algorithm) {
+    case "kmp":
+        System.out.println("Using Knuth-Morris-Pratt matching algorithm");
+        matcher = new KnuthMorrisPrattMatcher();
+        break;
+    case "naive":
+    default:
+        System.out.println("Using Brute-Force matching algorithm");
+        matcher = new BruteForceMatcher();
+}
+
+List<Integer> matchingPositions = matcher.match(haystack, needle);
+----
+
+### Shortcomings
+
+Obviously, an approach like this has a couple of flaws with regard to encapsulation and visibility, due to the constraints of the visibility and access control imposed by Java up until version 8. This results in a tight coupling of both modules. Even though we could provide a third Maven module `matchers-api` to separate the API from the implementation, this separation would be somewhat artificial, since the CLI would require both modules `matchers-api` and `matchers-core` nonetheless, giving it access to the implementation details in `matchers-core`.
+
+This is not the only code smell. For instance, the CLI is not in compliance with the https://web.archive.org/web/20060822033314/http://www.objectmentor.com/resources/articles/ocp.pdf[Open-Closed-Principle], since adding a new implementation in `matchers-core` is not available in the CLI if it is not explicitly wired into it. These smells can be mitigated though through a proper choice of design, but have nothing to do with the aforementioned limitations on encapsulation, visiblity and modularization that the JPMS tries to solve.
+
+With Java 9 and the JPMS we strive for a solution that provides a better encapsulation by truly hiding implementation details from consuming modules in such a way that we only need to express compile-time dependencies via JPMS (and of course via Maven on the Maven level), while being able to contribute implementation details through the module path by simply putting the resp. JARs into it.
+
+Let's see how this goes.
