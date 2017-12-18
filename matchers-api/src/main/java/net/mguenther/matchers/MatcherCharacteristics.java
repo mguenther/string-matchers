@@ -1,5 +1,7 @@
 package net.mguenther.matchers;
 
+import net.mguenther.matchers.naive.BruteForceMatcher;
+
 import java.util.function.Predicate;
 
 /**
@@ -21,5 +23,9 @@ public class MatcherCharacteristics {
     public static Predicate<Class<? extends Matcher>> isExperimental() {
 
         return clazz -> clazz.isAnnotationPresent(Experimental.class);
+    }
+
+    public static Matcher useDefault() {
+        return new BruteForceMatcher();
     }
 }

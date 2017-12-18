@@ -4,9 +4,11 @@ import net.mguenther.matchers.Matcher;
 import net.mguenther.matchers.MatcherCharacteristics;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
+
+import static net.mguenther.matchers.MatcherCharacteristics.isFast;
+import static net.mguenther.matchers.MatcherCharacteristics.isStable;
 
 /**
  * @author Markus Günther (markus.guenther@gmail.com)
@@ -23,19 +25,13 @@ public class MatchersCli {
         final String haystack = args[0];
         final String needle = args[1];
 
-        final Optional<Matcher> optionalMatcher = ServiceLoader
+        final Matcher matcher = ServiceLoader
                 .load(Matcher.class)
                 .stream()
-                .filter(provider -> MatcherCharacteristics.isStable().test(provider.type()))
+                .filter(provider -> isStable().and(isFast()).test(provider.type()))
                 .findFirst()
-                .map(ServiceLoader.Provider::get);
-
-        if (!optionalMatcher.isPresent()) {
-            System.out.println("Unable to find a suitable matcher with the given quality characteristics.");
-            System.exit(1);
-        }
-
-        final Matcher matcher = optionalMatcher.get();
+                .map(ServiceLoader.Provider::get)
+                .orElseGet(MatcherCharacteristics::useDefault);
 
         System.out.println("Using '" + matcher.getName() + "'.");
         final List<Integer> matchingPositions = matcher.match(haystack, needle);

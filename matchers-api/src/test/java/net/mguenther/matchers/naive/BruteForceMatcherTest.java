@@ -1,6 +1,7 @@
 package net.mguenther.matchers.naive;
 
 import net.mguenther.matchers.Matcher;
+import net.mguenther.matchers.naive.BruteForceMatcher;
 import org.junit.Test;
 
 import java.util.List;

@@ -1,5 +1,4 @@
-# String Matchers
-## A Journey from Java 8 to Java 9 modules
+# A Journey from Java 8 to Java 9 modules
 
 This repository contains a sample application that demonstrates how to refactor an existing multi-module Maven project from Java 8 to Java 9, while migrating to Jigsaw along the way.
 
