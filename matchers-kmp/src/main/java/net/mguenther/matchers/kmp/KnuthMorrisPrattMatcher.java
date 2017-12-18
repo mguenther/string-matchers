@@ -1,6 +1,8 @@
 package net.mguenther.matchers.kmp;
 
+import net.mguenther.matchers.Fast;
 import net.mguenther.matchers.Matcher;
+import net.mguenther.matchers.Stable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +13,8 @@ import static java.lang.Integer.max;
 /**
  * @author Markus Günther (markus.guenther@gmail.com)
  */
+@Stable
+@Fast
 public class KnuthMorrisPrattMatcher implements Matcher {
 
     @Override
@@ -66,6 +70,6 @@ public class KnuthMorrisPrattMatcher implements Matcher {
 
     @Override
     public String getName() {
-        return "kmp";
+        return "Knuth-Morris-Pratt Matcher";
     }
 }

@@ -1,6 +1,8 @@
 package net.mguenther.matchers.naive;
 
+import net.mguenther.matchers.Fast;
 import net.mguenther.matchers.Matcher;
+import net.mguenther.matchers.Stable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +11,8 @@ import java.util.List;
 /**
  * @author Markus Günther (markus.guenther@gmail.com)
  */
+@Stable
+@Fast(value = false)
 public class BruteForceMatcher implements Matcher {
 
     @Override
@@ -45,6 +49,6 @@ public class BruteForceMatcher implements Matcher {
 
     @Override
     public String getName() {
-        return "naive";
+        return "Naive Brute-Force Matcher";
     }
 }

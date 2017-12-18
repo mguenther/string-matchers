@@ -1,10 +1,10 @@
 package net.mguenther.matchers.cli;
 
 import net.mguenther.matchers.Matcher;
+import net.mguenther.matchers.MatcherCharacteristics;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
@@ -15,23 +15,28 @@ public class MatchersCli {
 
     public static void main(String[] args) {
 
-        if (args.length != 3) {
+        if (args.length != 2) {
             System.err.println("Wrong number of arguments. Expected: <algorithm> <haystack> <needle>");
             System.exit(1);
         }
 
-        final String algorithm = args[0];
-        final String haystack = args[1];
-        final String needle = args[2];
+        final String haystack = args[0];
+        final String needle = args[1];
 
-        final Map<String, Matcher> matchers = new HashMap<>();
-        Iterable<Matcher> availableMatchers = ServiceLoader.load(Matcher.class);
-        for (Matcher matcher : availableMatchers) {
-            System.out.println("Found matcher '" + matcher.getName() + "' provided by '" + matcher.getClass().getName() + "'.");
-            matchers.put(matcher.getName(), matcher);
+        final Optional<Matcher> optionalMatcher = ServiceLoader
+                .load(Matcher.class)
+                .stream()
+                .filter(provider -> MatcherCharacteristics.isStable().test(provider.type()))
+                .findFirst()
+                .map(ServiceLoader.Provider::get);
+
+        if (!optionalMatcher.isPresent()) {
+            System.out.println("Unable to find a suitable matcher with the given quality characteristics.");
+            System.exit(1);
         }
 
-        final Matcher matcher = matchers.getOrDefault(algorithm, matchers.get("naive"));
+        final Matcher matcher = optionalMatcher.get();
+
         System.out.println("Using '" + matcher.getName() + "'.");
         final List<Integer> matchingPositions = matcher.match(haystack, needle);
 

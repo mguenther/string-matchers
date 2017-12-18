@@ -1,0 +1,73 @@
+[[section:improved-service-selection]]
+
+## Selecting Services based on Quality Aspects
+
+One of the shortcomings of the previous solution is that we are yet unable to select a provided service based on non-functional characteristics. As a user, I do not care if the chosen string matcher follows the design of the Knuth-Morris-Pratt algorithm or the Boyer-Moore algorithm. Instead, I want it to be *stable* and *fast*. If there is a new, but yet not thoroughly tested matcher available, I may want to use that for an *experimental* client. When we think in terms of suitable implementations for the problem we try to solve, we do not think about specific details at first, but about the non-functional requirements that govern our process of finding a suitable solution.
+
+Reasoning about non-functional aspects matters on the level of the software architecture, but also on the level of our application architecture and design. It turns out that we can implement a very simple and approachable way to attribute implementations with those kinds of characteristics. For instance, attributes like *stable*, *fast* and *experimental* can be directly translated into Java annotations. Take a look at the implementation of `@Fast`.
+
+[source,java]
+----
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Fast {
+
+  boolean value() default true;
+}
+----
+
+Annotations for quality characteristics that express *stability* or *experimental* features can be implemented analogously. Using these annotations, we can attribute our implementations. For instance, the `KnuthMorrisPrattMatcher` is a fast algorithm that has been tested thoroughly using JUnit tests. Hence, we attribute it with `@Fast` and `@Stable` like so.
+
+[source,java]
+----
+@Stable
+@Fast
+public class KnuthMorrisPrattMatcher implements Matcher {
+  [...]
+}
+----
+
+Although stable, the naive `BruteForceMatcher` can be considered slower than the algorithm by Knuth, Morris and Pratt. It may just be our fallback strategy if no other matcher is available to us. But generally, we want to avoid it. Hence, we attribute it with `@Stable` and `@Fast(value = false)` like so.
+
+[source,java]
+----
+@Stable
+@Fast(value = false)
+public class BruteForceMatcher implements Matcher {
+  [...]
+}
+----
+
+The annotations are part of the public API and are thus co-located with the `Matcher` interface in module `matchers.api`. We can also add a couple of pre-defined predicate functions to ease the filtering process for the desired implementation at the service consumer.
+
+[source,java]
+----
+public class MatcherCharacteristics {
+
+  public static Predicate<Class<? extends Matcher>> isFast() {
+      return clazz -> clazz.isAnnotationPresent(Fast.class) &&
+                      clazz.getAnnotation(Fast.class).value();
+  }
+
+  public static Predicate<Class<? extends Matcher>> isStable() {
+      return clazz -> clazz.isAnnotationPresent(Stable.class);
+  }
+
+  public static Predicate<Class<? extends Matcher>> isExperimental() {
+      return clazz -> clazz.isAnnotationPresent(Experimental.class);
+  }
+}
+----
+
+Instances of `Predicate` play well with the Streams API and are composable with other predicates on the same target type, which makes their application easy to read and easy to maintain. Selecting any stable implementation comes down to the following lines of code.
+
+[source,java]
+----
+Optional<Matcher> optionalMatcher = ServiceLoader
+  .load(Matcher.class)
+  .stream()
+  .filter(provider -> MatcherCharacteristics.isStable().test(provider.type()))
+  .findFirst()
+  .map(ServiceLoader.Provider::get);
+----
+
+Adjusting the `filter` step yields different results. Combining `isStable` with `isFast` selects the `KnuthMorrisPrattMatcher`, as this is the only implementation that is attributed with both quality aspects.
