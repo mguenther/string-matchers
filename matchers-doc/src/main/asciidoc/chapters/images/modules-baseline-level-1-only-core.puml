@@ -1,0 +1,28 @@
+@startuml
+
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam frame {
+    borderColor Transparent
+    backgroundColor Transparent
+    fontColor Transparent
+}
+
+package "<b>matchers-core</b>" <<Maven Module>> {
+
+  package net.mguenther.matchers {
+
+    interface Matcher {
+      +match(haystack: String, needle: String): List[Integer]
+    }
+
+    class BruteForceMatcher
+    class KnuthMorrisPrattMatcher
+
+    BruteForceMatcher ..|> Matcher
+    KnuthMorrisPrattMatcher ..|> Matcher
+  }
+}
+
+@enduml

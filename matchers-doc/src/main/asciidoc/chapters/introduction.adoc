@@ -30,17 +30,13 @@ The https://github.com/mguenther/string-matchers/releases/tag/baseline[baseline]
 
 The compile-time dependencies on the level of our Maven modules are shown in the following diagram.
 
-[plantuml, baseline-maven-modules, svg]
---
-include::images/baseline-modules.puml[]
---
+image::images/introduction-baseline-modules.png[]
+[.small]_Figure 1: The application comprises two Maven modules: `matchers-core` which defines the API and strategies and `matchers-cli` which builds on top of the core library._
 
 Let us take a brief look at the internal structure of these Maven modules.
 
-[plantuml, baseline-maven-modules-level-1, svg]
---
-include::images/baseline-level-1.puml[]
---
+image::images/introduction-baseline-level-1.png[]
+[.small]_Figure 2: Both modules share the same package space._
 
 Maven module `matchers-core` provides the interface `Matcher`, with a clear contract: An implementation of the `Matcher` interface consumes a large body of text (call it _haystack_) and a fragment of text (call it _needle_) and looks up all the starting indices of fragments of text found in the large body of text. This interface is located in package `net.mguenther.matchers`.
 
@@ -54,12 +50,12 @@ Matcher matcher = null;
 
 switch (algorithm) {
     case "kmp":
-        System.out.println("Using Knuth-Morris-Pratt matching algorithm");
+        System.out.println("Using Knuth-Morris-Pratt matcher");
         matcher = new KnuthMorrisPrattMatcher();
         break;
     case "naive":
     default:
-        System.out.println("Using Brute-Force matching algorithm");
+        System.out.println("Using Brute-Force matcher");
         matcher = new BruteForceMatcher();
 }
 
@@ -68,10 +64,10 @@ List<Integer> matchingPositions = matcher.match(haystack, needle);
 
 ### Shortcomings
 
-Obviously, an approach like this has a couple of flaws with regard to encapsulation and visibility, due to the constraints of the visibility and access control imposed by Java up until version 8. This results in a tight coupling of both modules. Even though we could provide a third Maven module `matchers-api` to separate the API from the implementation, this separation would be somewhat artificial, since the CLI would require both modules `matchers-api` and `matchers-core` nonetheless, giving it access to the implementation details in `matchers-core`.
+Obviously, an approach like this has a couple of flaws with regard to encapsulation, due to the constraints of the visibility and access control imposed by Java up until version 8. This results in a tight coupling of both modules. Even though we could provide a third Maven module `matchers-api` to separate the API from the implementation, this separation would be somewhat artificial, since the CLI would require both modules `matchers-api` and `matchers-core` nonetheless, giving it access to the implementation details in `matchers-core`.
 
 This is not the only code smell. For instance, the CLI is not in compliance with the https://web.archive.org/web/20060822033314/http://www.objectmentor.com/resources/articles/ocp.pdf[Open-Closed-Principle], since adding a new implementation in `matchers-core` is not available in the CLI if it is not explicitly wired into it. These smells can be mitigated though through a proper choice of design, but have nothing to do with the aforementioned limitations on encapsulation, visiblity and modularization that the JPMS tries to solve.
 
-With Java 9 and the JPMS we strive for a solution that provides a better encapsulation by truly hiding implementation details from consuming modules in such a way that we only need to express compile-time dependencies via JPMS (and of course via Maven on the Maven level), while being able to contribute implementation details through the module path by simply putting the resp. JARs into it.
+With Java 9 and the JPMS we strive for a solution that provides a better encapsulation by truly hiding implementation details from consuming modules in such a way that we only need to express compile-time dependencies via JPMS (and of course via Maven on the Maven level), while being able to contribute implementation details through the module path by simply putting the respective JARs onto it.
 
 Let's see how this goes.

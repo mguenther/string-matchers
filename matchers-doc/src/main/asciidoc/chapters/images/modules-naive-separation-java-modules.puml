@@ -9,18 +9,13 @@ skinparam frame {
     fontColor Transparent
 }
 
-component "<b>java.base</b>" as javabase
 component "<b>matchers.api</b>" as matchersapi
-component "<b>matchers.impl</b>" as matcherscore
+component "<b>matchers.impl</b>" as matchersimpl
 component "<b>matchers.cli</b>" as matcherscli
 
-matcherscli ..> javabase
 matcherscli ..> matchersapi
-matcherscli ..> matcherscore
+matcherscli ..> matchersimpl
 
-matchersapi ..> javabase
-
-matcherscore ..> javabase
-matcherscore ..> matchersapi
+matchersimpl ..> matchersapi
 
 @enduml

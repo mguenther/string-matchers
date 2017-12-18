@@ -1,5 +1,0 @@
-[[section:migration-plugin-architectures]]
-
-## Plug-In Architectures
-
-TBD

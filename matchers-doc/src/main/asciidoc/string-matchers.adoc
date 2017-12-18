@@ -9,25 +9,22 @@
 :icons: font
 :pdf-stylesdir: css/
 :pdf-style: article
+:pdf-page-size: [16.5cm, 23.8cm]
 :experimental:
-:toc-title: Inhaltsverzeichnis
-:figure-caption: Abbildung
-:table-caption: Tabelle
-:status: in Bearbeitung
-:datum: 20. November 2017
+:toc-title: Table of Contents
+:figure-caption: Figure
+:table-caption: Table
+:status: Draft
+:datum: 2017-12-18
 :author: Markus Günther
 
 = A Journey To Java 9 Modules
 Markus Günther
-v1.0, 2017-11-20
+v1.0, 2017-12-18
 
 :toc:
 
 include::chapters/introduction.adoc[]
-
-//include::chapters/migration-path.adoc[]
-//include::chapters/migration-1-switch-to-jdk9.adoc[]
-//include::chapters/migration-2-matchers-core.adoc[]
-//include::chapters/migration-3-matchers-cli.adoc[]
-//include::chapters/migration-4-service-loaders.adoc[]
-//include::chapters/migration-5-plugin-architectures.adoc[]
+include::chapters/migrate-maven-build.adoc[]
+include::chapters/migrate-to-modules.adoc[]
+include::chapters/refactor-to-service-providers.adoc[]
