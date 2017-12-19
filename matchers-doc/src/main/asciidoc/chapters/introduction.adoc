@@ -36,7 +36,7 @@ image::images/introduction-baseline-modules.png[]
 Let us take a brief look at the internal structure of these Maven modules.
 
 image::images/introduction-baseline-level-1.png[]
-[.small]_Figure 2: Both modules share the same package space._
+[.small]_Figure 2: Both modules share the same packages._
 
 Maven module `matchers-core` provides the interface `Matcher`, with a clear contract: An implementation of the `Matcher` interface consumes a large body of text (call it _haystack_) and a fragment of text (call it _needle_) and looks up all the starting indices of fragments of text found in the large body of text. This interface is located in package `net.mguenther.matchers`.
 

@@ -1,6 +1,6 @@
 [[section:migration-service-loaders]]
 
-## Using Service Loaders
+## Using service loaders
 
 Although we progressed through to a working, modularized solution for our string matchers during the last chapter, we still have an unwanted dependency that goes directly from module `matchers.cli` to `matchers.impl`. This prohibits us from using a clean and extensible way of injecting implementations of the `Matcher` interface. Working through this chapter, our goal is to end up with a very loose coupling between our Java modules by implementing a mechanism for that kind of dependency injection. One way to do this is by using the Service Loader API footnote:[The Service Loader API is not new to Java 9, but has been around since Java 6.].
 

@@ -1,6 +1,6 @@
 [[section:improved-service-selection]]
 
-## Selecting Services based on Quality Aspects
+## Selecting Services based on quality aspects
 
 One of the shortcomings of the previous solution is that we are yet unable to select a provided service based on non-functional characteristics. As a user, I do not care if the chosen string matcher follows the design of the Knuth-Morris-Pratt or the Boyer-Moore algorithm. Instead, I want it to be _stable_ and _fast_. If there is a new, but yet not thoroughly tested matcher available, I may want to use that for an _experimental_ client. When we think in terms of suitable implementations for the problem we try to solve, we do not think about implementation internals at first, but rather about the non-functional requirements that govern the process of finding a suitable solution.
 

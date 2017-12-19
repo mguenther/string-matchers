@@ -46,8 +46,10 @@ As for the actual implementations of interface `Matchers`, we will re-use Maven 
 
 [source,java]
 ----
+module matchers.impl {
   requires matchers.api;
   exports net.mguenther.matchers;
+}
 ----
 
 Introducing this `module-info.java` will yield a couple of errors. First, the Maven module `matchers-api` - which contains the required dependency `matchers.api` - is not in the set of Maven dependencies for Maven module `matchers-core`. Using the JPMS does not relieve us from dealing with dependencies on the level of Maven. However, we can fix this quite easily by adding the following code to the `pom.xml` of the respective Maven module.

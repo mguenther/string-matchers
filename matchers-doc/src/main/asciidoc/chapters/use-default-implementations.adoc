@@ -1,6 +1,6 @@
 [[section:use-default-implementations]]
 
-## Use a default service provider
+## Using a default service provider
 
 What if there is no module on the module path that provides a suitable implementation of `Matcher`? What if there is no implementation of that interface at all? In this case, it is possible to provide a default implementation alongside the public API. The benefit is, that once the API module is distributed, it can definitely be put to use, even if the default implementation does not exhibit the quality aspects that we aimed for. Providing a default implementation is quite simple. Let us have a look again at the module graph of our application.
 
