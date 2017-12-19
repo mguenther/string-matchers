@@ -2,9 +2,9 @@
 
 ## Selecting Services based on Quality Aspects
 
-One of the shortcomings of the previous solution is that we are yet unable to select a provided service based on non-functional characteristics. As a user, I do not care if the chosen string matcher follows the design of the Knuth-Morris-Pratt algorithm or the Boyer-Moore algorithm. Instead, I want it to be *stable* and *fast*. If there is a new, but yet not thoroughly tested matcher available, I may want to use that for an *experimental* client. When we think in terms of suitable implementations for the problem we try to solve, we do not think about specific details at first, but about the non-functional requirements that govern our process of finding a suitable solution.
+One of the shortcomings of the previous solution is that we are yet unable to select a provided service based on non-functional characteristics. As a user, I do not care if the chosen string matcher follows the design of the Knuth-Morris-Pratt or the Boyer-Moore algorithm. Instead, I want it to be _stable_ and _fast_. If there is a new, but yet not thoroughly tested matcher available, I may want to use that for an _experimental_ client. When we think in terms of suitable implementations for the problem we try to solve, we do not think about implementation internals at first, but rather about the non-functional requirements that govern the process of finding a suitable solution.
 
-Reasoning about non-functional aspects matters on the level of the software architecture, but also on the level of our application architecture and design. It turns out that we can implement a very simple and approachable way to attribute implementations with those kinds of characteristics. For instance, attributes like *stable*, *fast* and *experimental* can be directly translated into Java annotations. Take a look at the implementation of `@Fast`.
+Reasoning about non-functional aspects matters on the level of the software architecture, but also on the level of our application architecture and component design. It turns out that we can implement a very simple, yet approachable way to attribute implementations with those kinds of characteristics. For instance, attributes like _stable_, _fast_ and _experimental_ can be directly translated into Java annotations. Take a look at the implementation of `@Fast`.
 
 [source,java]
 ----
@@ -15,7 +15,7 @@ public @interface Fast {
 }
 ----
 
-Annotations for quality characteristics that express *stability* or *experimental* features can be implemented analogously. Using these annotations, we can attribute our implementations. For instance, the `KnuthMorrisPrattMatcher` is a fast algorithm that has been tested thoroughly using JUnit tests. Hence, we attribute it with `@Fast` and `@Stable` like so.
+Annotations for quality characteristics that express _stability_ or _experimental_ features can be implemented analogously. Using these annotations, we can attribute our implementations. For instance, the `KnuthMorrisPrattMatcher` is a fast algorithm that has been tested thoroughly using JUnit tests. Hence, we attribute it with `@Fast` and `@Stable` like so.
 
 [source,java]
 ----
@@ -44,16 +44,16 @@ The annotations are part of the public API and are thus co-located with the `Mat
 public class MatcherCharacteristics {
 
   public static Predicate<Class<? extends Matcher>> isFast() {
-      return clazz -> clazz.isAnnotationPresent(Fast.class) &&
-                      clazz.getAnnotation(Fast.class).value();
+    return clazz -> clazz.isAnnotationPresent(Fast.class) &&
+                    clazz.getAnnotation(Fast.class).value();
   }
 
   public static Predicate<Class<? extends Matcher>> isStable() {
-      return clazz -> clazz.isAnnotationPresent(Stable.class);
+    return clazz -> clazz.isAnnotationPresent(Stable.class);
   }
 
   public static Predicate<Class<? extends Matcher>> isExperimental() {
-      return clazz -> clazz.isAnnotationPresent(Experimental.class);
+    return clazz -> clazz.isAnnotationPresent(Experimental.class);
   }
 }
 ----

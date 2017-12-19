@@ -2,7 +2,7 @@
 
 ## Using Service Loaders
 
-Although we progressed through to a working, modularized solution for our string matchers during the last chapter, we still have an unwanted dependency that goes directly from module `matchers.cli` to `matchers.impl`, prohibiting use from using a clean and extensible way of injecting implementations of the `Matcher` interface. Working through this chapter, our goal is to end up with a very loose coupling between our Java modules by implementing a mechanism for that kind of dependency injection. One way to do this is by using the Service Loader API footnote:[The Service Loader API is not new to Java 9, but has been around since Java 6.].
+Although we progressed through to a working, modularized solution for our string matchers during the last chapter, we still have an unwanted dependency that goes directly from module `matchers.cli` to `matchers.impl`. This prohibits us from using a clean and extensible way of injecting implementations of the `Matcher` interface. Working through this chapter, our goal is to end up with a very loose coupling between our Java modules by implementing a mechanism for that kind of dependency injection. One way to do this is by using the Service Loader API footnote:[The Service Loader API is not new to Java 9, but has been around since Java 6.].
 
 We will not go into detail on the actual Service Loader API, its specification and other technicalities, but rather focus on its integration with the JPMS for providing and consuming services. All we need to know to this point is that our consuming module `matchers.cli` will simply declare that it requires an implementation of the `Matcher` interface and the Service Loader API will provide it with such an implementation footnote:[Unless there is no such implementation on the module path.].
 
@@ -12,9 +12,9 @@ Before we do so, we extend the `Matcher` interface to also provide a name or (te
 ----
 public interface Matcher {
 
-    List<Integer> match(String haystack, String needle);
+  List<Integer> match(String haystack, String needle);
 
-    String getName();
+  String getName();
 }
 ----
 
@@ -28,18 +28,18 @@ After the adaption, we need to change the module descriptor of `matchers.impl` a
 ----
 module matchers.impl {
 
-    requires matchers.api;
+  requires matchers.api;
 
-    provides net.mguenther.matchers.Matcher
-        with net.mguenther.matchers.impl.BruteForceMatcher;
-    provides net.mguenther.matchers.Matcher
-        with net.mguenther.matchers.impl.KnuthMorrisPrattMatcher;
+  provides net.mguenther.matchers.Matcher
+      with net.mguenther.matchers.impl.BruteForceMatcher;
+  provides net.mguenther.matchers.Matcher
+      with net.mguenther.matchers.impl.KnuthMorrisPrattMatcher;
 }
 ----
 
 It is not possible to provide more than a single implementation for a given interface. The compiler will fail with: _Duplicate 'provides': net.mguenther.matchers.Matcher_. This is actually due to the design of the Service Loader API. Prior to Java 9 you would have to place a file named `net.mguenther.matchers.Matcher` into directory `META-INF/services` that must consist of only a single line of text, for example `net.mguenther.matchers.impl.BruteForceMatcher`. Back then the Service Loader API was unable to deal with multiple implementations in a JAR as well and thus had the same restriction.
 
-Due to the limited capabilities of the Service Loader API we have to split up our modules even further. Here is what we are going to implement:
+Due to the limited capabilities of the Service Loader API we have to split up our modules even further. Here is what our final solution will look like.
 
 image::images/service-provider-java-modules.png[]
 [.small]_Figure 7: Each string matching algorithm to its own Java module, thus enabling an even better form of loose coupling via service providers._
@@ -52,10 +52,10 @@ The module descriptors for both `matchers.naive` and `matchers.kmp` satisfy the 
 ----
 module matchers.naive {
 
-    requires matchers.api;
+  requires matchers.api;
 
-    provides net.mguenther.matchers.Matcher
-        with net.mguenther.matchers.naive.BruteForceMatcher;
+  provides net.mguenther.matchers.Matcher
+      with net.mguenther.matchers.naive.BruteForceMatcher;
 }
 ----
 
@@ -67,26 +67,26 @@ As long as modules `matchers.naive` and `matchers.kmp` are on the module path, t
 ----
 module matchers.cli {
 
-    requires matchers.api;
+  requires matchers.api;
 
-    uses net.mguenther.matchers.Matcher;
+  uses net.mguenther.matchers.Matcher;
 }
 ----
 
-Please note that we got rid of the dependency from `matchers.cli` to the implementing modules `matchers.naive` and `matchers.kmp` altogether! But to complete our mission, we will have to adapt the code in class `MatchersCli`. The following listing shows how to get all available services for the requested interface.
+Note that we got rid of the dependency from `matchers.cli` to the implementing modules `matchers.naive` and `matchers.kmp` altogether! But to complete our mission, we will have to adapt the code in class `MatchersCli`. The following listing shows how to get all available services for the requested interface.
 
 [source,java]
 ----
 Iterable<Matcher> availableMatchers =
   ServiceLoader.load(Matcher.class);
 for (Matcher matcher : availableMatchers) {
-    System.out.println(
-      "Found matcher '" + matcher.getName() + "' " +
-      "provided by '" + matcher.getClass().getName() + "'.");
+  System.out.println(
+    "Found matcher '" + matcher.getName() + "' " +
+    "provided by '" + matcher.getClass().getName() + "'.");
 }
 ----
 
-The tight coupling to the individual implementations is gone, instead, we use the abstractions provided by class `java.util.ServiceLoader`.  For the sake of the example, we keep things simple and store a (name, matcher)-relation using a `Map<String, Matcher>` while doing doing a reverse-lookup based on the name to select the algorithm for the search.
+The tight coupling to the individual implementations is gone, instead, we use the abstractions provided by class `java.util.ServiceLoader`. For the sake of the example, we keep things simple and store a (name, matcher)-relation using a `Map<String, Matcher>` while doing doing a reverse-lookup based on the name to select the algorithm for the search.
 
 We still have to put the modules that contain the implementations on the module path. On your local machine, this can be done using your IDE for testing purposes. For IntelliJ IDEA, this is easy: Open up the module settings, go to module `matchers.cli` and add runtime module dependencies for those modules that you want to put on the module path. If you start the CLI via console, you can add the resp. modules to the module path providing a `--add-modules <modules>` via command-line arguments.
 
@@ -94,7 +94,7 @@ We still have to put the modules that contain the implementations on the module 
 
 Using the Service Loader API, we can finally add additional implementations quite easily, without the need to modify any of our existing code. Let's say that we also want to provide a Boyer-Moore matcher. The steps involved are:
 
-1. Create a new Maven module, call it `matchers-boyer-moore` that closes over a Java module, call it `matchers.bm`.
+1. Create a new Maven module, call it `matchers-boyer-moore`, that closes over a Java module, call it `matchers.bm`.
 2. Implement the algorithm in a class called `BoyerMooreMatcher`. `BoyerMooreMatcher` must implement the `Matcher` interface for obvious reasons.
 3. Provide a module descriptor that exposes the `BoyerMooreMatcher` as a provided service of module `matchers.bm`
 

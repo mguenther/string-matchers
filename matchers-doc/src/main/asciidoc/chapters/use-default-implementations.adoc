@@ -2,7 +2,7 @@
 
 ## Use a default service provider
 
-What if there is no module on the module path that provides a suitable implementation of `Matcher`? What if there is no implementation of that interface at all? In this case, it is possible to provide a default implementation alongside the public API. The benefit is, that once the API module is distributed, it can definitely be put to use, even if the default implementation does not exhibit the quality aspects that aimed for. Providing a default implementation is quite simple. Let us have a look again at the module graph of our application.
+What if there is no module on the module path that provides a suitable implementation of `Matcher`? What if there is no implementation of that interface at all? In this case, it is possible to provide a default implementation alongside the public API. The benefit is, that once the API module is distributed, it can definitely be put to use, even if the default implementation does not exhibit the quality aspects that we aimed for. Providing a default implementation is quite simple. Let us have a look again at the module graph of our application.
 
 image::images/service-provider-java-modules.png[]
 [.small]_Figure 8: The current state of affairs for our little string matching application._
@@ -51,10 +51,10 @@ The API module does not have to export the default implementation - it will rema
 ----
 module matchers.api {
 
-    exports net.mguenther.matchers;
+  exports net.mguenther.matchers;
 
-    provides net.mguenther.matchers.Matcher
-            with BruteForceMatcher;
+  provides net.mguenther.matchers.Matcher
+      with net.mguenther.matchers.naive.BruteForceMatcher;
 }
 ----
 
@@ -83,6 +83,3 @@ Matcher matcher = ServiceLoader
   .orElseGet(MatcherCharacteristics::useDefault);
 ----
 
-## Summary
-
-Integrating this last piece of code into `MatchersCli` finally satisfies our initial mission statement. We have not only modularized the entire Java application, but also put the JPMS to good in use. Through the Service Loader API we achieved a very loosely coupled system of modules that exhibit strong encapsulation and information hiding while at the same time not introducing any unsatisfactory dependencies between any pair of modules. Using annotations to attribute implementations with quality aspects allows us to choose the implementation that fits the current situation best. And finally, by co-locating a default implementation, albeit undesirable with regard to its quality aspects, we guarantee that the API remains usable even though no specific implementation is currently present on the module path.

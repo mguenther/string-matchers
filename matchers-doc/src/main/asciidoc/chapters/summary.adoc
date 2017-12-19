@@ -1,0 +1,5 @@
+[[section:summary]]
+
+## Summary
+
+Integrating this last piece of code into `MatchersCli` finally satisfies our initial mission statement. We have not only modularized the entire Java application, but also put the JPMS to good in use. Through the Service Loader API we achieved a very loosely coupled system of modules that exhibit strong encapsulation and information hiding while at the same time not introducing any unsatisfactory dependencies between any pair of modules. Using annotations to attribute implementations with quality aspects allows us to choose the implementation that fits the current situation best. And finally, by co-locating a default implementation, albeit undesirable with regard to its quality aspects, we guarantee that the API remains usable even though no specific implementation is currently present on the module path.

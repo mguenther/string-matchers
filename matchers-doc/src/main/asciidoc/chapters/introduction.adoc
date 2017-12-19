@@ -42,21 +42,21 @@ Maven module `matchers-core` provides the interface `Matcher`, with a clear cont
 
 Co-located with the interface are the aforementioned implementations in classes `BruteForceMatcher` and `KnuthMorrisPrattMatcher`.
 
-Although Maven module `matchers-cli` uses the interface `Matcher` to run a specific algorithm, it requires knowledge about the supported implementations. This is due to the fact that a user is able to select the algorithm she wants to use by its (abbreviated) name, which is mapped in class `MatchersCli` to an instance of the class that implements the desired algorithm. The listing underneath shows an excerpt of that class demonstrating the resolution and execution of the string matching algorithm.
+Although Maven module `matchers-cli` uses the interface `Matcher` to run a specific algorithm, it requires knowledge about the supported implementations. This is due to the fact that a user is able to select the algorithm she wants to use by its (abbreviated) name, which is mapped in class `MatchersCli` to an instance of the class that implements the algorithm. The listing underneath shows an excerpt of that class demonstrating the resolution and execution of the string matching algorithm.
 
 [source,java]
 ----
 Matcher matcher = null;
 
 switch (algorithm) {
-    case "kmp":
-        System.out.println("Using Knuth-Morris-Pratt matcher");
-        matcher = new KnuthMorrisPrattMatcher();
-        break;
-    case "naive":
-    default:
-        System.out.println("Using Brute-Force matcher");
-        matcher = new BruteForceMatcher();
+  case "kmp":
+    System.out.println("Using Knuth-Morris-Pratt matcher");
+    matcher = new KnuthMorrisPrattMatcher();
+    break;
+  case "naive":
+  default:
+    System.out.println("Using Brute-Force matcher");
+    matcher = new BruteForceMatcher();
 }
 
 List<Integer> matchingPositions = matcher.match(haystack, needle);
@@ -64,9 +64,9 @@ List<Integer> matchingPositions = matcher.match(haystack, needle);
 
 ### Shortcomings
 
-Obviously, an approach like this has a couple of flaws with regard to encapsulation, due to the constraints of the visibility and access control imposed by Java up until version 8. This results in a tight coupling of both modules. Even though we could provide a third Maven module `matchers-api` to separate the API from the implementation, this separation would be somewhat artificial, since the CLI would require both modules `matchers-api` and `matchers-core` nonetheless, giving it access to the implementation details in `matchers-core`.
+Obviously, an approach like this has a couple of flaws with regard to encapsulation, due to the limitations of the visibility and access control imposed by Java up until version 8. This results in a tight coupling of both modules. Even though we could provide a third Maven module `matchers-api` to separate the API from the implementation, this separation would be somewhat artificial, since the CLI would require both modules `matchers-api` and `matchers-core` nonetheless, giving it access to the implementation details in `matchers-core`.
 
-This is not the only code smell. For instance, the CLI is not in compliance with the https://web.archive.org/web/20060822033314/http://www.objectmentor.com/resources/articles/ocp.pdf[Open-Closed-Principle], since adding a new implementation in `matchers-core` is not available in the CLI if it is not explicitly wired into it. These smells can be mitigated though through a proper choice of design, but have nothing to do with the aforementioned limitations on encapsulation, visiblity and modularization that the JPMS tries to solve.
+This is not the only code smell. For instance, the CLI is not in compliance with the https://web.archive.org/web/20060822033314/http://www.objectmentor.com/resources/articles/ocp.pdf[Open-Closed-Principle], since adding a new implementation in `matchers-core` is not available in the CLI if it is not explicitly wired into it. These smells can be mitigated though through a proper choice of design, but have nothing to do with the aforementioned limitations that the JPMS tries to solve.
 
 With Java 9 and the JPMS we strive for a solution that provides a better encapsulation by truly hiding implementation details from consuming modules in such a way that we only need to express compile-time dependencies via JPMS (and of course via Maven on the Maven level), while being able to contribute implementation details through the module path by simply putting the respective JARs onto it.
 
