@@ -14,7 +14,7 @@
 :toc-title: Table of Contents
 :figure-caption: Figure
 :table-caption: Table
-:status: Draft
+:status: Final
 :datum: 2017-12-18
 :author: Markus Günther
 
