@@ -18,7 +18,7 @@ public class MatchersCli {
     public static void main(String[] args) {
 
         if (args.length != 2) {
-            System.err.println("Wrong number of arguments. Expected: <algorithm> <haystack> <needle>");
+            System.err.println("Wrong number of arguments. Expected: <haystack> <needle>");
             System.exit(1);
         }
 
