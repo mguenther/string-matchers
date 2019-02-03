@@ -1,4 +1,5 @@
 [[section:migration-service-loaders]]
+ifndef::imagesdir[:imagesdir: images]
 
 ## Using service loaders
 
@@ -41,7 +42,7 @@ It is not possible to provide more than a single implementation for a given inte
 
 Due to the limited capabilities of the Service Loader API we have to split up our modules even further. Here is what our final solution will look like.
 
-image::images/service-provider-java-modules.png[]
+image::service-provider-java-modules.png[]
 [.small]_Figure 7: Each string matching algorithm to its own Java module, thus enabling an even better form of loose coupling via service providers._
 
 This will provide a very clean separation between the CLI and our algorithms, since both only have to depend on module `matchers.api`. We will not go into much detail on splitting up those modules again, since we have done this exhaustively during the course of the last chapter. So, to sum up: We will move `BruteForceMatcher` into a Java module called `matchers.naive` (with its enclosing Maven module `matchers-naive`) and the `KnuthMorrisPrattMatcher` into module `matchers.kmp` (with its enclosing Maven module `matchers-kmp`). After introducing these two new modules, we can get rid of `matchers.impl` altogether.

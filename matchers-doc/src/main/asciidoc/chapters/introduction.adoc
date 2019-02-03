@@ -1,4 +1,5 @@
 [[section:introduction]]
+ifndef::imagesdir[:imagesdir: images]
 
 ## Introduction
 
@@ -30,12 +31,12 @@ The https://github.com/mguenther/string-matchers/releases/tag/baseline[baseline]
 
 The compile-time dependencies on the level of our Maven modules are shown in the following diagram.
 
-image::images/introduction-baseline-modules.png[]
+image::introduction-baseline-modules.png[]
 [.small]_Figure 1: The application comprises two Maven modules: `matchers-core` which defines the API and strategies and `matchers-cli` which builds on top of the core library._
 
 Let us take a brief look at the internal structure of these Maven modules.
 
-image::images/introduction-baseline-level-1.png[]
+image::introduction-baseline-level-1.png[]
 [.small]_Figure 2: Both modules share the same packages._
 
 Maven module `matchers-core` provides the interface `Matcher`, with a clear contract: An implementation of the `Matcher` interface consumes a large body of text (call it _haystack_) and a fragment of text (call it _needle_) and looks up all the starting indices of fragments of text found in the large body of text. This interface is located in package `net.mguenther.matchers`.
