@@ -36,7 +36,6 @@
                         <modulepath/>
                         <argument>--module</argument>
                         <argument>matchers.cli/net.mguenther.matchers.cli.MatchersCli</argument>
-                        <argument>kmp</argument>
                         <argument>abcdfffggffgg</argument>
                         <argument>fgg</argument>
                     </arguments>
