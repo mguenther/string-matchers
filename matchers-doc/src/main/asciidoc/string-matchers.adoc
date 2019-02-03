@@ -5,7 +5,7 @@
 :stylesdir: css/
 :source-highlighter: coderay
 :numbered:
-:imagesdir: chapters
+:imagesdir: chapters/images
 :icons: font
 :pdf-stylesdir: css/
 :pdf-style: article

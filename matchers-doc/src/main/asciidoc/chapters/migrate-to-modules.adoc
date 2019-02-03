@@ -1,4 +1,5 @@
 [[section:migration-matchers-core]]
+ifndef::imagesdir[:imagesdir: images]
 
 ## Modularizing an existing codebase
 
@@ -14,7 +15,7 @@ Through the course of this migration guide, we will denote Maven modules using h
 
 Recall the layout of Maven module `matchers-core`.
 
-image::images/modules-baseline-level-1-only-core.png[]
+image::modules-baseline-level-1-only-core.png[]
 [.small]_Figure 3: Both API and implementation are sharing the same package._
 
 All interfaces and classes reside in the same package. First of all, we will create a new Maven module, call it `matchers-api` that will host a Java module, call it `matchers.api`, comprising the API for our string matching algorithms. The interface `Matcher` is copied over to this module and we will expose it to other modules by exporting the whole package footnote:[This is okay, since this module comprises only classes and interfaces that contribute to the public API of our application.]. We will keep the interface `Matchers` in its original module as well, so the build does not break just yet.
@@ -71,14 +72,14 @@ _Package 'net.mguenther.matchers' exists in another module: 'matchers.api'_
 
 Let us take a step back and look at what we achieved so far.
 
-image::images/modules-naive-separation-with-split-packages.png[]
+image::modules-naive-separation-with-split-packages.png[]
 [.small]_Figure 4: The JPMS prohibits packages that are shared across multiple modules._
 
 Although the separation into two distinct modules fits quite nicely, the package boundaries do not: We introduced a so called _split package_. A split package is a package that spans multiple modules. The JPMS enforces that a single package has its dedicated Java module and thus prohibits the use of split packages. From a package design perspective, this seems a bit unnatural as both modules contribute to the same component and, at least from my understanding, a component can surely span multiple modules footnote:[The closure of a component must not even be known at compile time. Think of pluggable application architectures, in which you simply add modules (JARs) to the module path to extend the functionality of a component.].
 
 Anyhow, to fix the issue, we have to abide by the rule that a Java module cannot share packages it contains with another module, so we rename `net.mguenther.matchers` of module `matchers.impl` into `net.mguenther.matchers.impl` for the time being. We end up with a working solution that looks like this.
 
-image::images/modules-naive-separation-without-split-packages.png[]
+image::modules-naive-separation-without-split-packages.png[]
 [.small]_Figure 5: Each Java module has to use its own package._
 
 The standard Maven directory layout still applies, even if we take the JUnit tests into account that exist for the matcher implementations. After applying all changes, it should look like this.
@@ -124,7 +125,7 @@ module matchers.cli {
 
 With this module descriptor in place, the solution comprising all three modules should build and run perfectly fine. Have a look at what we achieved so far in terms of (enclosing) Maven modules. Note that there is a 1:1-correlation between the dependency graph of the Maven modules and the dependency graph of the resp. Java modules.
 
-image::images/modules-naive-separation-java-modules.png[]
+image::modules-naive-separation-java-modules.png[]
 [.small]_Figure 6: The CLI still has an unwanted dependency on `matchers.impl`._
 
 But contrary to our initial mission statement, this makes one thing quite obvious: We are still not getting rid of the unwanted dependency from CLI to the implementation. We will address this issue in the following chapter.

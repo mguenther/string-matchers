@@ -46,6 +46,7 @@
                             <requires>
                                 <require>asciidoctor-diagram</require>
                             </requires>
+                            <imagesDir>chapters/images</imagesDir>
                             <attributes>
                                 <toc>left</toc>
                             </attributes>
@@ -114,7 +115,7 @@
                                         <require>asciidoctor-diagram</require>
                                     </requires>
                                     <backend>pdf</backend>
-                                    <imagesDir>../../../target/generated-docs/chapters</imagesDir>
+                                    <imagesDir>../../../target/generated-docs/chapters/images</imagesDir>
                                     <sourceHighlighter>rouge</sourceHighlighter> <!-- coderay also possible -->
                                     <attributes>
                                         <icons>font</icons>
